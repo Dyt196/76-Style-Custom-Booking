@@ -62,12 +62,19 @@
           <div>{{ outletSetup.config.displayHour }}</div>
         </div>
         <div class="flex gap-8 items-center w-full">
-          <div v-show="outlet.outlet.contact" class="flex gap-2 items-center">
+          <!-- <div v-show="outlet.outlet.contact" class="flex gap-2 items-center">
             <icon name="heroicons:phone" style="width: 20px; height: 20px" />
             <div>+{{ outlet.outlet.contact }}</div>
+          </div> -->
+          <div
+            v-show="mockContact(outlet.outlet.outletID)"
+            class="flex gap-2 items-center"
+          >
+            <icon name="heroicons:phone" style="width: 20px; height: 20px" />
+            <div>+{{ mockContact(outlet.outlet.outletID) }}</div>
           </div>
           <a
-            v-show="outlet.outlet.social.whatsapp"
+            v-if="outlet.outlet.social.whatsapp"
             class="flex gap-2 items-center hover:underline hover:text-secondary"
             :href="outlet.outlet.social.whatsapp"
             target="_blank"
@@ -76,7 +83,11 @@
               name="ic:baseline-whatsapp"
               style="width: 20px; height: 20px"
             />
-            <div>+{{ outlet.outlet.contact }}</div>
+            <div>
+              +{{
+                outlet.outlet.social.whatsapp.replace(/https:\/\/wa.me\//g, "")
+              }}
+            </div>
           </a>
         </div>
       </div>
@@ -142,6 +153,22 @@ const emit = defineEmits(["openStaff"]);
 
 function selectStaff(stf: Staff) {
   emit("openStaff", stf);
+}
+
+const displayContact = ref([
+  { outletID: 7903, contact: "603-6203 5111" },
+  { outletID: 7901, contact: "603-2110 3768 / 6176" },
+  { outletID: 7902, contact: "603-3051 1768" },
+]);
+
+function mockContact(outletID: number) {
+  const theContact = displayContact.value.find(
+    (val) => val.outletID == outletID,
+  );
+  if (theContact) {
+    return theContact.contact;
+  }
+  return null;
 }
 </script>
 
