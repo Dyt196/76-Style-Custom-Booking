@@ -168,16 +168,17 @@ function filterTimeSlot(hourStart: number, hourEnd: number) {
         .map(Number);
       const limitChosen = new Date(chosenDay.value.dayTimeStamp);
       limitChosen.setHours(hours ? hours : hourEnd, minutes, seconds, 0);
-      return chosenDay.value.slotTimeStamp
-        .filter(
-          (slt) => slt >= startTime.getTime() && slt < limitChosen.getTime(),
-        )
-        .sort((a, b) => a - b);
-    } else {
-      return chosenDay.value.slotTimeStamp
-        .filter((slt) => slt >= startTime.getTime() && slt < endTime.getTime())
-        .sort((a, b) => a - b);
+      if (limitChosen.getTime() < endTime.getTime()) {
+        return chosenDay.value.slotTimeStamp
+          .filter(
+            (slt) => slt >= startTime.getTime() && slt < limitChosen.getTime(),
+          )
+          .sort((a, b) => a - b);
+      }
     }
+    return chosenDay.value.slotTimeStamp
+      .filter((slt) => slt >= startTime.getTime() && slt < endTime.getTime())
+      .sort((a, b) => a - b);
   } else {
     return [];
   }
