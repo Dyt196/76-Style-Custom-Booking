@@ -215,7 +215,9 @@ onMounted(async () => {
           :href="selectedOutlet.social.whatsapp"
           class="cursor-pointer underline hover:text-secondary"
           target="_blank"
-          >+{{ selectedOutlet?.contact }}
+          >+{{
+            selectedOutlet?.social.whatsapp.replace(/https:\/\/wa.me\//g, "")
+          }}
         </a>
         <span v-else>+{{ selectedOutlet?.contact }}</span>
       </div>
