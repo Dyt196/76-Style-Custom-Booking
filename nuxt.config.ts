@@ -10,7 +10,9 @@ export default defineNuxtConfig({
     awsTraceStream: '',
     awsErrorStream: '',
     awsInforStream: '',
-    public:{}
+    public:{
+      shortname: ''
+    }
   },
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
@@ -73,6 +75,7 @@ export default defineNuxtConfig({
     detectBrowserLanguage: false
   },
   app: {
+    baseURL: process.env.NUXT_BASE_URL || '/',
     head: {
       title: "Tunai App",
       htmlAttrs: {

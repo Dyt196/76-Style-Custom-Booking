@@ -7,7 +7,9 @@ const route = useRoute();
 const router = useRouter();
 const mainStore = useMainStore();
 const shortname = computed(() => {
-  return route.params.merchant ? route.params.merchant : "76STYLE";
+  return route.params.merchant
+    ? route.params.merchant
+    : (useRuntimeConfig().public.shortname as string);
 });
 
 const outletID = computed(() => {
