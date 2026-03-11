@@ -32,7 +32,7 @@
             </a>
 
             <a
-              href="https://www.76style.com/our-team/"
+              href="https://www.76style.com/76-Style-Custom-Booking/"
               class="hover:underline text-md font-bold px-5 py-2"
             >
               <div>Our Team</div>
