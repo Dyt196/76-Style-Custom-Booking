@@ -9,7 +9,7 @@ export const myLog = {
 
 async function send(level: string, message: string, data?: LogRes) {
   try {
-    await $fetch('/api/log', {
+    await $fetch('https://web.tunai.io/api/log', {
       method: 'POST',
       body: { level, message, data }
     })
