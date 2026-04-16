@@ -115,7 +115,9 @@ const bookStep = computed<BookStep[]>(() => {
       code: "DET",
       condition: selectedDate.value == null,
       nextCondition:
-        !hasError.value.hasError && bookingDetail.value.name.trim() != "",
+        !hasError.value.hasError &&
+        bookingDetail.value.name.trim() != "" &&
+        bookingDetail.value.email?.trim() != "",
       page: MainDetail,
       props: {
         bookingDetail: bookingDetail.value,
