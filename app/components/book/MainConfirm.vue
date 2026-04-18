@@ -116,6 +116,7 @@
 
 <script lang="ts" setup>
 import { format } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 import type { ConfirmBooking } from "~/model/booking";
 import type { AllOutlet } from "~/model/custom";
 import type { MenuItem } from "~/model/service";
@@ -136,7 +137,12 @@ function goStep(step: number) {
 }
 
 function filterDate(formString: string, dateTime: number) {
-  return format(dateTime, formString);
+  // return format(dateTime, formString);
+  return formatInTimeZone(
+    dateTime,
+    props.outlet.outlet.timezone ?? "Asia/Kuala_Lumpur",
+    formString,
+  );
 }
 </script>
 

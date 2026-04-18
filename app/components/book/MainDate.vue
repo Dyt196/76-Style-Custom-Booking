@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { format } from "date-fns";
+import { addDays, format } from "date-fns";
+import { formatInTimeZone, toZonedTime, fromZonedTime } from "date-fns-tz";
 import type {
   DateBlock,
   DateSlot,
@@ -15,6 +16,10 @@ const props = defineProps<{
   selectedService: MenuItem[];
   selectedTime: number | null;
 }>();
+
+const timezone = computed(
+  () => props.outletSetup.timezone ?? "Asia/Kuala_Lumpur",
+);
 
 const emit = defineEmits(["selectDate"]);
 
@@ -33,8 +38,9 @@ const staffSlot = ref<StaffSlot[]>([]);
 const loadDate = ref(false);
 
 function getDayCode(theDate: number) {
-  const checkDate = new Date(theDate);
-  return checkDate.getDay();
+  // const checkDate = new Date(theDate);
+  // return checkDate.getDay();
+  return parseInt(formatInTimeZone(theDate, timezone.value, "i")) % 7;
 }
 
 const currentWeekRange = ref<DateBlock[]>([]);
@@ -44,20 +50,28 @@ const blockedSlot = ref<BlockedSlot[]>([]);
 const nowDate = ref(Date.now());
 
 function filterDate(formString: string, dateTime: number) {
-  return format(dateTime, formString);
+  // return format(dateTime, formString);
+  return formatInTimeZone(
+    dateTime,
+    props.outletSetup.timezone ?? "Asia/Kuala_Lumpur",
+    formString,
+  );
 }
 
 function nextRange() {
-  const targetMonday = new Date(chosenMonday.value);
-  targetMonday.setDate(targetMonday.getDate() + 7);
+  // const targetMonday = new Date(chosenMonday.value);
+  const targetMonday = addDays(chosenMonday.value, 7);
   // giveOutRange(8, 21, targetMonday.getTime());
   // generateSlot(targetMonday.getTime());
+  console.info("Going Next", targetMonday);
   generateNewSlot(targetMonday.getTime());
 }
 
 function prevRange() {
-  const targetMonday = new Date(chosenMonday.value);
-  targetMonday.setDate(targetMonday.getDate() - 7);
+  // const targetMonday = new Date(chosenMonday.value);
+  // const setMonday = toZonedTime(chosenMonday.value, timezone.value);
+  const targetMonday = addDays(chosenMonday.value, -7);
+
   // giveOutRange(8, 21, targetMonday.getTime());
   // generateSlot(targetMonday.getTime());
   generateNewSlot(targetMonday.getTime());
@@ -74,23 +88,34 @@ function checkFuture() {
 async function generateNewSlot(theDateRange: number) {
   let dataRange: DateBlock[] = [];
 
-  const mondayDate = new Date(theDateRange);
-  const day = mondayDate.getDay();
+  // const mondayDate = new Date(theDateRange);
+  // const day = mondayDate.getDay();
+  const zoned = toZonedTime(theDateRange, timezone.value);
+  // const mondayDate = toZonedTime(theDateRange, timezone.value);
+  const day = parseInt(formatInTimeZone(theDateRange, timezone.value, "i"));
   const diffToMonday = day === 0 ? -6 : 1 - day;
-  mondayDate.setDate(mondayDate.getDate() + diffToMonday);
-  mondayDate.setHours(0, 0, 0, 0);
-  chosenMonday.value = mondayDate.getTime();
+  const mondayDate = addDays(theDateRange, diffToMonday);
+  // mondayDate.setDate(mondayDate.getDate() + diffToMonday);
+  // mondayDate.setHours(0, 0, 0, 0);
 
-  const sundayDate = new Date(mondayDate);
-  sundayDate.setDate(mondayDate.getDate() + 7);
+  const dateStr = formatInTimeZone(mondayDate, timezone.value, "yyyy-MM-dd");
+
+  const mondayStart = fromZonedTime(`${dateStr} 00:00:00`, timezone.value);
+
+  chosenMonday.value = mondayStart.getTime();
+
+  // const sundayDate = new Date(mondayDate);
+  // const sundayDate = toZonedTime(mondayDate, timezone.value)
+  // sundayDate.setDate(sundayDate.getDate() + 7);
+  const sundayDate = addDays(mondayStart, 7);
 
   const todayDate = new Date(nowDate.value);
 
   const slotResponse = await getDateAvailability(
     props.selectedStaff.staffID.toString(),
     props.outletSetup.outletID,
-    mondayDate.getTime() > todayDate.getTime()
-      ? mondayDate.getTime() / 1000
+    mondayStart.getTime() > todayDate.getTime()
+      ? mondayStart.getTime() / 1000
       : nowDate.value / 1000,
     sundayDate.getTime() / 1000,
     props.selectedService.reduce((total, svc) => total + svc.duration, 0) / 15,
@@ -116,15 +141,15 @@ async function generateNewSlot(theDateRange: number) {
     }));
   }
   for (let i = 0; i < 7; i++) {
-    const dayDate = new Date(mondayDate);
-    dayDate.setDate(mondayDate.getDate() + i);
-
+    const dayDate = addDays(mondayStart, i);
     let times: number[] = [];
-    const filteredSlot = availSlot.filter((tSlot) => {
-      const checkDate = new Date(tSlot.date * 1000);
-      return checkDate.getDate() == dayDate.getDate();
-    });
 
+    const toKey = (ts: number) =>
+      formatInTimeZone(ts, timezone.value, "yyyy-MM-dd");
+
+    const filteredSlot = availSlot.filter((tSlot) => {
+      return toKey(tSlot.date * 1000) === toKey(dayDate.getTime());
+    });
     if (filteredSlot) {
       times = filteredSlot
         .map((tSlot) => tSlot.date * 1000)
@@ -138,18 +163,26 @@ async function generateNewSlot(theDateRange: number) {
   }
 
   currentWeekRange.value = dataRange;
+  // console.info("Current Week", currentWeekRange.value);
 }
 
 function disablePrevDay(day: number) {
   const buffer = props.outletSetup.config.buffer * 60 * 60 * 1000;
-  const toDate = new Date(nowDate.value + buffer);
-  toDate.setHours(0, 0, 0, 0);
+  // const toDate = new Date(nowDate.value + buffer);
+  const toDate = new Date(
+    formatInTimeZone(
+      nowDate.value + buffer,
+      timezone.value,
+      "yyyy-MM-dd 00:00:00",
+    ),
+  );
   return day < toDate.getTime();
 }
 
 function disableFuture(dayTime: number) {
-  const todayDate = new Date(nowDate.value);
-  todayDate.setHours(0, 0, 0, 0);
+  const todayDate = new Date(
+    formatInTimeZone(nowDate.value, timezone.value, "yyyy-MM-dd 00:00:00"),
+  );
   const futureInMili =
     props.outletSetup.config.futureInDays * 24 * 60 * 60 * 1000;
   return dayTime > todayDate.getTime() + futureInMili;
@@ -157,17 +190,35 @@ function disableFuture(dayTime: number) {
 
 function filterTimeSlot(hourStart: number, hourEnd: number) {
   const lastHour = props.selectedService[0];
-  const startTime = new Date(chosenDay.value.dayTimeStamp);
-  const endTime = new Date(chosenDay.value.dayTimeStamp);
-  startTime.setHours(hourStart, 0, 0, 0);
-  endTime.setHours(hourEnd, 0, 0, 0);
+  const startTime = new Date(
+    formatInTimeZone(
+      chosenDay.value.dayTimeStamp,
+      timezone.value,
+      `yyyy-MM-dd ${String(hourStart).padStart(2, "0")}:00:00`,
+    ),
+  );
+  const endTime = new Date(
+    formatInTimeZone(
+      chosenDay.value.dayTimeStamp,
+      timezone.value,
+      `yyyy-MM-dd ${String(hourEnd).padStart(2, "0")}:00:00`,
+    ),
+  );
+  // startTime.setHours(hourStart, 0, 0, 0);
+  // endTime.setHours(hourEnd, 0, 0, 0);
   if (chosenDay.value != null) {
     if (lastHour?.lastHour) {
       const [hours, minutes, seconds] = lastHour.lastHour
         .split(":")
         .map(Number);
-      const limitChosen = new Date(chosenDay.value.dayTimeStamp);
-      limitChosen.setHours(hours ? hours : hourEnd, minutes, seconds, 0);
+      const limitChosen = new Date(
+        formatInTimeZone(
+          chosenDay.value.dayTimeStamp,
+          timezone.value,
+          `yyyy-MM-dd ${hours ? hours : hourEnd}:${minutes}:${seconds}`,
+        ),
+      );
+      // limitChosen.setHours(hours ? hours : hourEnd, minutes, seconds, 0);
       if (limitChosen.getTime() < endTime.getTime()) {
         return chosenDay.value.slotTimeStamp
           .filter(
@@ -191,8 +242,13 @@ onMounted(async () => {
   // giveOutRange(8, 21, props.pickedTime ? props.pickedTime : targetDate);
   // generateSlot(props.pickedTime ? props.pickedTime : targetDate);
   await generateNewSlot(props.selectedTime ? props.selectedTime : targetDate);
-  const today = new Date(props.selectedTime ? props.selectedTime : targetDate);
-  today.setHours(0, 0, 0, 0);
+  const dateStr = formatInTimeZone(
+    props.selectedTime ? props.selectedTime : targetDate,
+    timezone.value,
+    "yyyy-MM-dd",
+  );
+
+  const today = fromZonedTime(`${dateStr} 00:00:00`, timezone.value);
   const checkRange = currentWeekRange.value.find(
     (rng) => rng.dayTimeStamp == today.getTime(),
   );

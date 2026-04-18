@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Appointment } from "~/model/booking";
 import { format } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 import type { MenuItem } from "~/model/service";
 import type { Staff } from "~/model/staff";
 import type { Outlet } from "~/model/merchant";
@@ -13,7 +14,12 @@ const toast = useToast();
 
 const nowTime = ref(Date.now());
 function filterDate(formString: string, dateTime: number) {
-  return format(dateTime, formString);
+  // return format(dateTime, formString);
+  return formatInTimeZone(
+    dateTime,
+    bookDetail.value?.outlet.timezone ?? "Asia/Kuala_Lumpur",
+    formString,
+  );
 }
 
 const buttonLoad = ref(false);
