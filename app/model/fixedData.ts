@@ -91,6 +91,55 @@ export const mobileCodeList = [
     icon: "circle-flags:tw",
   },
   {
+    code: 81,
+    label: "JP +81",
+    country: "Japan",
+    regex: /^(81)[789]0\d{4}\d{4}$/,
+    icon: "circle-flags:jp"
+  },
+  {
+    code: 82,
+    label: "KR +82",
+    country: "South Korea",
+    regex: /^(82)(10|[2-6][1-5]?)\d{7,8}$/,
+    icon: "circle-flags:kr"
+  },
+  {
+    code: 86,
+    label: "CN +86",
+    country: "China",
+    regex: /^(86)[1-9]\d{8,12}$/,
+    icon: "circle-flags:cn"
+  },
+  {
+    code: 84,
+    label: "VN +84",
+    country: "Vietnam",
+    regex: /^(84)(3[2-9]|5[2689]|7[06-9]|8[1-9]|9[0-9])\d{7}$/,
+    icon: "circle-flags:vn"
+  },
+  {
+    code: 855,
+    label: "KH +855",
+    country: "Cambodia",
+    regex: /^(855)(1[0-8]|6[016-9]|7[016-8]|8[013-9]|9[0-35-9])\d{6,7}$/,
+    icon: "circle-flags:kh"
+  },
+  {
+    code: 856,
+    label: "LA +856",
+    country: "Laos",
+    regex: /^(856)20\d{8}$/,
+    icon: "circle-flags:la"
+  },
+  {
+    code: 95,
+    label: "MM +95",
+    country: "Myanmar",
+    regex: /^(95)\d{7,11}$/,
+    icon: "circle-flags:mm"
+  },
+  {
     code: null,
     label: "Other +",
     country: "Other",
