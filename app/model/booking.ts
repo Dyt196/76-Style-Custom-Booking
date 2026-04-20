@@ -141,3 +141,9 @@ export interface Availability {
     start: number,
     stop: number
 }
+
+export interface LocalForm {
+    name: string,
+    email: string,
+    mobile: number
+}

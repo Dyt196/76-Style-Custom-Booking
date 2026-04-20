@@ -2,6 +2,7 @@
 import {
   type BookStep,
   type ConfirmBooking,
+  type LocalForm,
   type OutletConfigMain,
 } from "~/model/booking";
 import type { AllOutlet } from "~/model/custom";
@@ -240,6 +241,25 @@ function closeDialog() {
   emits("closeDialog");
 }
 
+function saveToLocal() {
+  const saveForm = {
+    name: bookingDetail.value.name,
+    mobile: bookingDetail.value.mobile,
+    email: bookingDetail.value.email,
+  };
+  localStorage.setItem("BookForm76", JSON.stringify(saveForm));
+}
+
+function loadForm() {
+  const rawData = localStorage.getItem("BookForm76");
+  if (rawData) {
+    const data = JSON.parse(rawData) as LocalForm;
+    bookingDetail.value.name = data.name;
+    bookingDetail.value.email = data.email;
+    bookingDetail.value.mobile = data.mobile;
+  }
+}
+
 async function createAppointment() {
   if (
     selectedOutlet.value &&
@@ -248,6 +268,7 @@ async function createAppointment() {
     selectedService.value.length > 0
   ) {
     mainLoading.value = true;
+    saveToLocal();
 
     const sendApi = await sendBooking(
       selectedOutlet.value.outlet.outletID,
@@ -289,6 +310,7 @@ onMounted(() => {
   } else {
     currStep.value = 1;
   }
+  loadForm();
 });
 </script>
 
