@@ -233,6 +233,9 @@ const openDia = ref(false);
             "
           />
         </div>
+        <div class="text-xs font-semibold">
+          Please use your current WhatsApp number for booking
+        </div>
       </div>
       <div class="w-full flex flex-col gap-0">
         <div class="text-primary font-bold text-lg px-2 flex items-end">
