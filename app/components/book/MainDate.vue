@@ -63,7 +63,7 @@ function nextRange() {
   const targetMonday = addDays(chosenMonday.value, 7);
   // giveOutRange(8, 21, targetMonday.getTime());
   // generateSlot(targetMonday.getTime());
-  console.info("Going Next", targetMonday);
+  // console.info("Going Next", targetMonday);
   generateNewSlot(targetMonday.getTime());
 }
 

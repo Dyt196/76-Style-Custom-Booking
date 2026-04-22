@@ -283,6 +283,36 @@ const openDia = ref(false);
         </div>
       </div>
     </div>
+    <u-modal v-model:open="openDia" class="max-w-[80vw]">
+      <template #content>
+        <div
+          class="flex flex-col h-[85vw]"
+          style="background-color: var(--white-bg); border-radius: 10px"
+        >
+          <div class="p-4 flex text-lg font-bold">
+            {{ $t("landingPage.mCountCode") }}
+          </div>
+          <u-separator />
+          <div
+            class="flex-1 flex-col overflow-y-auto main-hide-scrollbar whitespace-nowrap scroll-smooth touch-pan-y"
+          >
+            <template v-for="valCod in codeAvail">
+              <div
+                class="p-3 flex gap-2 items-center text-lg font-semibold cursor-pointer hover:bg-muted"
+                @click="
+                  changeCode(valCod);
+                  openDia = false;
+                "
+              >
+                <u-icon :name="valCod.icon" />
+                <div>{{ valCod.country }} (+{{ valCod.code }})</div>
+              </div>
+              <u-separator />
+            </template>
+          </div>
+        </div>
+      </template>
+    </u-modal>
   </div>
 </template>
 
